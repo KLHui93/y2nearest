@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>Round It Up! 近似值大挑战</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: #ffffff;
+      font-family: 'Comic Sans MS', cursive;
+      text-align: center;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #e5ffe5;
+      border: 3px solid #000000;
+      aspect-ratio: 16 / 9;
+      width: 90vw;
+      height: auto;
+      max-height: 80vh;
+    }
+    .mode-buttons {
+      margin: 10px;
+    }
+    .mode-buttons button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 18px;
+      background-color: #2e7d32;
+      color: white;
+      border: 2px solid #1b5e20;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #question {
+      font-size: 28px;
+      margin: 10px 0;
+      color: #333;
+    }
+    #countdown {
+      font-size: 120px;
+      font-weight: bold;
+      color: red;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      width: 100%;
+      text-align: center;
+    }
+  </style>
+
+</head>
+<body>
+  <h1>Round It Up! 近似值大挑战</h1>
+  <div class="mode-buttons">
+    <button id="btn-ten" onclick="selectMode(this, 'ten')">十位近似值</button>
+    <button id="btn-hundred" onclick="selectMode(this, 'hundred')">百位近似值</button>
+  </div>
+  <p id="question" style="min-height: 40px; font-size: 28px; margin: 10px 0; color: #333;"></p>
+  <canvas id="gameCanvas" width="960" height="540"></canvas>
+  <p id="scoreDisplay"></p>
+  <div id="countdown"></div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const box = 30;
+    let snake1, snake2, dir1, dir2, score1, score2;
+    let foods, currentNumber, correctAnswer, options;
+    let currentMode = 'ten';
+    let game;
+let flashToggle = true;
+setInterval(() => { flashToggle = !flashToggle; }, 300);
+
+    function prepareGame(mode) {
+      
+      
+      currentMode = mode;
+      requestFullscreen(canvas);
+      let countdown = 3;
+      const countdownEl = document.getElementById("countdown");
+      countdownEl.innerText = countdown;
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          countdownEl.innerText = countdown;
+        } else {
+          clearInterval(countdownInterval);
+          countdownEl.innerText = '';
+          startGame();
+        }
+      }, 1000);
+    }
+
+    function requestFullscreen(element) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
+    }
+
+    function generateQuestion() {
+      do {
+        currentNumber = Math.floor(Math.random() * 999);
+      } while (currentNumber % 10 === 0);
+      correctAnswer = currentMode === 'ten' ? Math.round(currentNumber / 10) * 10 : Math.round(currentNumber / 100) * 100;
+      options = [correctAnswer];
+      while (options.length < 3) {
+        let offset = (Math.floor(Math.random() * 5) - 2) * (currentMode === 'ten' ? 10 : 100);
+        let distractor = correctAnswer + offset;
+        if (distractor >= 0 && distractor < 1000 && !options.includes(distractor)) {
+          options.push(distractor);
+        }
+      }
+      options.sort(() => Math.random() - 0.5);
+      document.getElementById("question").innerText = `${currentNumber} 的${currentMode === 'ten' ? '十位近似值' : '百位近似值'}是？`;
+    }
+
+    function startGame() {
+      resetSnake(1);
+      resetSnake(2);
+      score1 = 0;
+      score2 = 0;
+      generateQuestion();
+      placeFoods();
+      if (typeof game !== 'undefined') clearInterval(game);
+      game = setInterval(draw, 180); // 修复变量重复声明问题 // 增加移动速度
+    }
+
+    function resetSnake(player) {
+      if (player === 1) {
+        snake1 = [{ x: 6 * box, y: 10 * box }];
+        dir1 = "RIGHT";
+      } else {
+        snake2 = [{ x: 24 * box, y: 10 * box }];
+        dir2 = "LEFT";
+      }
+    }
+
+    function placeFoods() {
+      const avoidZones = [...snake1, ...snake2];
+      const minDistance = box * 6;
+      foods = options.map(value => {
+        let pos;
+        let attempts = 0;
+        do {
+          pos = {
+            x: Math.floor(Math.random() * (canvas.width / box)) * box,
+            y: Math.floor(Math.random() * (canvas.height / box)) * box,
+            value: value
+          };
+          attempts++;
+        } while (
+          avoidZones.some(s => Math.abs(s.x - pos.x) < minDistance && Math.abs(s.y - pos.y) < minDistance)
+          && attempts < 100
+        );
+        return pos;
+      });
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
+      if (e.key === "ArrowLeft" && dir2 !== "RIGHT") dir2 = "LEFT";
+      else if (e.key === "ArrowUp" && dir2 !== "DOWN") dir2 = "UP";
+      else if (e.key === "ArrowRight" && dir2 !== "LEFT") dir2 = "RIGHT";
+      else if (e.key === "ArrowDown" && dir2 !== "UP") dir2 = "DOWN";
+
+      if (e.key === "a" && dir1 !== "RIGHT") dir1 = "LEFT";
+      else if (e.key === "w" && dir1 !== "DOWN") dir1 = "UP";
+      else if (e.key === "d" && dir1 !== "LEFT") dir1 = "RIGHT";
+      else if (e.key === "s" && dir1 !== "UP") dir1 = "DOWN";
+    });
+
+    function draw() {
+      drawGrid();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawSnake(snake1, "#0066ff", "#3399ff");
+      drawSnake(snake2, "#ff0000", "#ff6666");
+
+      foods.forEach(food => {
+        ctx.fillStyle = flashToggle ? "#ffff33" : "#ffee00";
+        ctx.fillRect(food.x, food.y, box, box);
+        ctx.fillStyle = "#000";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(food.value, food.x + box / 2, food.y + box / 2);
+      });
+
+      moveSnake(snake1, dir1, playerEatHandler(1), 1);
+      moveSnake(snake2, dir2, playerEatHandler(2), 2);
+
+      document.getElementById("scoreDisplay").innerText = `蓝方得分：${score1} ｜ 红方得分：${score2}`;
+    }
+
+    function drawGrid() {
+      ctx.strokeStyle = '#cceeff';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += box) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += box) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+
+    function drawSnake(snake, headColor, bodyColor) {
+      for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = i === 0 ? headColor : bodyColor;
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+      }
+    }
+
+function moveSnake(snake, direction, eatCallback, playerId) {
+      let headX = snake[0].x;
+      let headY = snake[0].y;
+
+      if (direction === "LEFT") headX -= box;
+      if (direction === "RIGHT") headX += box;
+      if (direction === "UP") headY -= box;
+      if (direction === "DOWN") headY += box;
+
+      if (headX < 0) headX = canvas.width - box;
+      else if (headX >= canvas.width) headX = 0;
+      if (headY < 0) headY = canvas.height - box;
+      else if (headY >= canvas.height) headY = 0;
+
+      let newHead = { x: headX, y: headY };
+      let eaten = false;
+
+      for (let i = 0; i < foods.length; i++) {
+        const food = foods[i];
+        if (food.x === headX && food.y === headY) {
+          eaten = true;
+          if (food.value === correctAnswer) {
+            
+            eatCallback();
+            generateQuestion();
+            placeFoods();
+          } else {
+            
+            resetSnake(playerId);
+          }
+          break;
+        }
+      }
+
+      if (!eaten) snake.pop();
+      snake.unshift(newHead);
+    }
+
+    function playerEatHandler(player) {
+      return () => {
+        if (player === 1) score1++;
+        else if (player === 2) score2++;
+      };
+    }
+  function selectMode(button, mode) {
+      document.getElementById('btn-ten').style.outline = 'none';
+      document.getElementById('btn-hundred').style.outline = 'none';
+      document.getElementById('btn-ten').style.boxShadow = 'none';
+      document.getElementById('btn-hundred').style.boxShadow = 'none';
+
+      button.style.boxShadow = '0 0 10px 3px #66bb6a';
+      prepareGame(mode);
+    }
+</script>
+</body>
+</html>
