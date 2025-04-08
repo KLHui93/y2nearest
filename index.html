@@ -98,22 +98,15 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
     }
 
     function requestFullscreen() {
-      const docElm = document.documentElement;
-      if (docElm.requestFullscreen) {
-        docElm.requestFullscreen();
-      } else if (docElm.webkitRequestFullscreen) {
-        docElm.webkitRequestFullscreen();
-      } else if (docElm.msRequestFullscreen) {
-        docElm.msRequestFullscreen();
-      } else if (document.body.requestFullscreen) {
-        document.body.requestFullscreen();
-      }
-    } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-      } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen();
-      }
-    }
+  const docElm = document.documentElement;
+  if (docElm.requestFullscreen) {
+    docElm.requestFullscreen();
+  } else if (docElm.webkitRequestFullscreen) {
+    docElm.webkitRequestFullscreen();
+  } else if (docElm.msRequestFullscreen) {
+    docElm.msRequestFullscreen();
+  }
+}
 
     function generateQuestion() {
       do {
