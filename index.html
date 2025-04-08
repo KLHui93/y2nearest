@@ -75,11 +75,11 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const box = 30;
-    let snake1, snake2, dir1, dir2, score1, score2;
-    let foods, currentNumber, correctAnswer, options;
+    let snake1 = [], snake2 = [], dir1 = "RIGHT", dir2 = "LEFT", score1 = 0, score2 = 0;
+    let foods = [], currentNumber = 0, correctAnswer = 0, options = [];
     let currentMode = 'ten';
-    let game;
-    let timer;
+    let game = null;
+    let timer = null;
     let timeLeft = 300;
     let flashToggle = true;
     setInterval(() => { flashToggle = !flashToggle; }, 300);
@@ -334,9 +334,8 @@
         }
       };
     }
-    }
 
-    function selectMode(button, mode) {
+function selectMode(button, mode) {
       document.getElementById('btn-ten').style.outline = 'none';
       document.getElementById('btn-hundred').style.outline = 'none';
       document.getElementById('btn-ten').style.boxShadow = 'none';
