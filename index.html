@@ -79,10 +79,8 @@ let flashToggle = true;
 setInterval(() => { flashToggle = !flashToggle; }, 300);
 
     function prepareGame(mode) {
-      
-      
       currentMode = mode;
-      requestFullscreen(document.documentElement);
+      requestFullscreen();
       let countdown = 3;
       const countdownEl = document.getElementById("countdown");
       countdownEl.innerText = countdown;
@@ -98,10 +96,18 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
       }, 1000);
     }
 
-    function requestFullscreen(element) {
-      if (element.requestFullscreen) {
-        element.requestFullscreen();
-      } else if (element.webkitRequestFullscreen) {
+    function requestFullscreen() {
+      const docElm = document.documentElement;
+      if (docElm.requestFullscreen) {
+        docElm.requestFullscreen();
+      } else if (docElm.webkitRequestFullscreen) {
+        docElm.webkitRequestFullscreen();
+      } else if (docElm.msRequestFullscreen) {
+        docElm.msRequestFullscreen();
+      } else if (document.body.requestFullscreen) {
+        document.body.requestFullscreen();
+      }
+    } else if (element.webkitRequestFullscreen) {
         element.webkitRequestFullscreen();
       } else if (element.msRequestFullscreen) {
         element.msRequestFullscreen();
