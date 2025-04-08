@@ -56,8 +56,24 @@
       text-align: center;
     }
   </style>
+<style>
+    #fullscreenBtn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      padding: 8px 16px;
+      font-size: 16px;
+      background-color: #2e7d32;
+      color: white;
+      border: 2px solid #1b5e20;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
+  <button id="fullscreenBtn" onclick="toggleFullscreen()">全屏</button>
   <h1 style="margin-top: 20px; font-size: 36px; color: #2e7d32; text-shadow: 1px 1px #ccc;">Round It Up! 近似值大挑战</h1>
   <div class="mode-buttons" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
     <button id="btn-ten" onclick="selectMode(this, 'ten')">十位近似值</button>
@@ -344,6 +360,15 @@ function selectMode(button, mode) {
       button.style.boxShadow = '0 0 10px 3px #66bb6a';
       prepareGame(mode);
     }
-  </script>
+  function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+    document.getElementById("fullscreenBtn").innerText = "退出全屏";
+  } else {
+    document.exitFullscreen();
+    document.getElementById("fullscreenBtn").innerText = "全屏";
+  }
+}
+</script>
 </body>
 </html>
