@@ -65,6 +65,7 @@
   </div>
   <p id="question" style="min-height: 40px; font-size: 28px; margin: 10px 0; color: #333;"></p>
   <canvas id="gameCanvas" width="960" height="540"></canvas>
+  <p id="timerDisplay" style="margin: 10px 0; font-size: 20px; color: #555;"></p>
   <p id="scoreDisplay"></p>
   <div id="countdown"></div>
 
@@ -76,6 +77,8 @@
     let foods, currentNumber, correctAnswer, options;
     let currentMode = 'ten';
     let game;
+let timer;
+let timeLeft = 420; // 7 minutes
 let flashToggle = true;
 setInterval(() => { flashToggle = !flashToggle; }, 300);
 
@@ -126,6 +129,21 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
     }
 
     function startGame() {
+      clearInterval(timer);
+      timeLeft = 420;
+      timer = setInterval(() => {
+        timeLeft--;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `倒数计时：${minutes}分${seconds.toString().padStart(2, '0')}秒`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          clearInterval(game);
+          let winner = score1 > score2 ? '蓝方胜出！' : score2 > score1 ? '红方胜出！' : '平局！';
+          alert(`游戏结束！
+${winner}`);
+        }
+      }, 1000);
       resetSnake(1);
       resetSnake(2);
       score1 = 0;
