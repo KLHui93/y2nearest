@@ -15,7 +15,7 @@
     }
     canvas {
       display: block;
-      margin: 20px auto;
+      margin: 20px auto 30px auto;
       background: #e5ffe5;
       border: 3px solid #000000;
       aspect-ratio: 16 / 9;
@@ -65,8 +65,13 @@
   </div>
   <p id="question" style="min-height: 40px; font-size: 28px; margin: 10px 0; color: #333;"></p>
   <canvas id="gameCanvas" width="960" height="540"></canvas>
-  <p id="timerDisplay" style="margin: 10px 0; font-size: 20px; color: #555;"></p>
-  <p id="scoreDisplay"></p>
+  <div style="position: absolute; top: 10px; left: 20px; font-size: 20px; color: #555; z-index: 20;">
+  <p id="timerDisplay">倒数计时：7分00秒</p>
+</div>
+<div style="position: absolute; top: 10px; right: 20px; font-size: 20px; color: #555; z-index: 20;">
+  <p id="timerDisplayRight">倒数计时：7分00秒</p>
+</div>
+  
   <div id="countdown"></div>
 
   <script>
@@ -84,6 +89,8 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
 
     function prepareGame(mode) {
       currentMode = mode;
+      document.getElementById("timerDisplay").innerText = "倒数计时：7分00秒";
+      document.getElementById("timerDisplayRight").innerText = "倒数计时：7分00秒";
       requestFullscreen();
       let countdown = 3;
       const countdownEl = document.getElementById("countdown");
@@ -136,6 +143,7 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
         document.getElementById("timerDisplay").innerText = `倒数计时：${minutes}分${seconds.toString().padStart(2, '0')}秒`;
+        document.getElementById("timerDisplayRight").innerText = `倒数计时：${minutes}分${seconds.toString().padStart(2, '0')}秒`;
         if (timeLeft <= 0) {
           clearInterval(timer);
           clearInterval(game);
