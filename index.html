@@ -15,13 +15,13 @@
     }
     canvas {
       display: block;
-      margin: 20px auto 30px auto;
+      margin: 40px auto;
       background: #e5ffe5;
       border: 3px solid #000000;
       aspect-ratio: 16 / 9;
       width: 90vw;
       height: auto;
-      max-height: 80vh;
+      max-height: calc(100vh - 200px);
       padding-bottom: 10px;
     }
     .mode-buttons {
@@ -66,12 +66,9 @@
   <p id="question" style="min-height: 40px; font-size: 28px; margin: 10px 0; color: #333;"></p>
   <canvas id="gameCanvas" width="960" height="540"></canvas>
   <div style="position: absolute; top: 10px; left: 20px; font-size: 20px; color: #555; z-index: 20;">
-  <p id="timerDisplay">倒数计时：7分00秒</p>
+  <p id="timerDisplay">倒数计时：5分00秒</p>
 </div>
-<div style="position: absolute; top: 10px; right: 20px; font-size: 20px; color: #555; z-index: 20;">
-  <p id="scoreDisplay">蓝方得分：0 ｜ 红方得分：0</p>
-  <p id="timerDisplayRight">倒数计时：7分00秒</p>
-</div>
+
   
   <div id="countdown"></div>
 
@@ -84,15 +81,17 @@
     let currentMode = 'ten';
     let game;
 let timer;
-let timeLeft = 420; // 7 minutes
+let timeLeft = 300; // 7 minutes
 let flashToggle = true;
 setInterval(() => { flashToggle = !flashToggle; }, 300);
 
     function prepareGame(mode) {
       currentMode = mode;
-      document.getElementById("timerDisplay").innerText = "倒数计时：7分00秒";
-      document.getElementById("timerDisplayRight").innerText = "倒数计时：7分00秒";
-      requestFullscreen();
+      clearInterval(timer);
+      clearInterval(game);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById("timerDisplay").innerText = "倒数计时：5分00秒";
+                  requestFullscreen();
       let countdown = 3;
       const countdownEl = document.getElementById("countdown");
       countdownEl.innerText = countdown;
@@ -106,9 +105,8 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
           startGame();
         }
       }, 1000);
-    }
-
-    function requestFullscreen() {
+        }
+      } function requestFullscreen() {
   const docElm = document.documentElement;
   if (docElm.requestFullscreen) {
     docElm.requestFullscreen();
@@ -138,19 +136,42 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
 
     function startGame() {
       clearInterval(timer);
-      timeLeft = 420;
+      timeLeft = 300;
       timer = setInterval(() => {
         timeLeft--;
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
         document.getElementById("timerDisplay").innerText = `倒数计时：${minutes}分${seconds.toString().padStart(2, '0')}秒`;
-        document.getElementById("timerDisplayRight").innerText = `倒数计时：${minutes}分${seconds.toString().padStart(2, '0')}秒`;
-        if (timeLeft <= 0) {
+                if (timeLeft <= 0) {
           clearInterval(timer);
           clearInterval(game);
           let winner = score1 > score2 ? '蓝方胜出！' : score2 > score1 ? '红方胜出！' : '平局！';
-          alert(`游戏结束！
-${winner}`);
+          setTimeout(() => {
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.background = 'white';
+            modal.style.border = '3px solid #2e7d32';
+            modal.style.borderRadius = '16px';
+            modal.style.padding = '30px 50px';
+            modal.style.zIndex = '999';
+            modal.style.boxShadow = '0 0 15px rgba(0,0,0,0.3)';
+            modal.innerHTML = `<h2 style='margin: 0 0 20px;'>游戏结束</h2><p style='font-size: 24px;'>${winner}</p>`;
+            const okBtn = document.createElement('button');
+            okBtn.innerText = '确定';
+            okBtn.style.marginTop = '20px';
+            okBtn.style.padding = '10px 20px';
+            okBtn.style.fontSize = '16px';
+            okBtn.style.border = 'none';
+            okBtn.style.background = '#2e7d32';
+            okBtn.style.color = 'white';
+            okBtn.style.borderRadius = '8px';
+            okBtn.onclick = () => document.body.removeChild(modal);
+            modal.appendChild(okBtn);
+            document.body.appendChild(modal);
+          }, 100);
         }
       }, 1000);
       resetSnake(1);
