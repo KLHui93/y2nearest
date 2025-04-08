@@ -8,18 +8,21 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden;
+      overflow: auto;
       background-color: #ffffff;
       font-family: 'Comic Sans MS', cursive;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     canvas {
       display: block;
       margin: 40px auto 80px auto;
       background: #e5ffe5;
       border: 3px solid #000000;
-      width: 900px;
-      height: 450px;
+      width: 1200px;
+      height: 600px;
       padding-bottom: 10px;
     }
     .mode-buttons {
@@ -55,18 +58,19 @@
   </style>
 </head>
 <body>
-  <h1>Round It Up! 近似值大挑战</h1>
-  <div class="mode-buttons">
+  <h1 style="margin-top: 20px; font-size: 36px; color: #2e7d32; text-shadow: 1px 1px #ccc;">Round It Up! 近似值大挑战</h1>
+  <div class="mode-buttons" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
     <button id="btn-ten" onclick="selectMode(this, 'ten')">十位近似值</button>
     <button id="btn-hundred" onclick="selectMode(this, 'hundred')">百位近似值</button>
   </div>
-  <p id="question" style="min-height: 40px; font-size: 28px; margin: 10px 0; color: #333;"></p>
-  <canvas id="gameCanvas" width="900" height="450"></canvas>
-  <div style="position: absolute; top: 10px; left: 20px; font-size: 20px; color: #555; z-index: 20;">
+  <p id="question" style="min-height: 40px; font-size: 28px; margin: 10px 0; color: #333; background-color: #f1f8e9; border: 2px dashed #2e7d32; border-radius: 12px; padding: 10px; width: 90%; max-width: 800px; box-shadow: 1px 1px 4px rgba(0,0,0,0.1);"></p>
+  <canvas id="gameCanvas" width="1200" height="600"></canvas>
+  <div style="position: absolute; top: 10px; left: 20px; font-size: 32px; color: #555; z-index: 20;">
     <p id="timerDisplay">倒数计时：5分00秒</p>
   </div>
-  <p id="scoreDisplay" style="display:none;"></p>
-  <div id="countdown"></div>
+  <div id="scoreBlue" style="position: absolute; bottom: 20px; left: 30px; font-size: 28px; color: #0066ff; font-weight: bold; z-index: 10;">蓝方得分：0</div>
+<div id="scoreRed" style="position: absolute; bottom: 20px; right: 30px; font-size: 28px; color: #ff0000; font-weight: bold; z-index: 10;">红方得分：0</div>
+  <div id="countdown" style="pointer-events: none;"></div>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -86,8 +90,7 @@
       clearInterval(game);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       document.getElementById("timerDisplay").innerText = "倒数计时：5分00秒";
-      document.getElementById("scoreDisplay").innerText = "";
-      requestFullscreen();
+            // requestFullscreen();
       let countdown = 3;
       const countdownEl = document.getElementById("countdown");
       countdownEl.innerText = countdown;
@@ -234,8 +237,8 @@
     });
 
     function draw() {
-      drawGrid();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGrid();
       drawSnake(snake1, "#0066ff", "#3399ff");
       drawSnake(snake2, "#ff0000", "#ff6666");
 
@@ -303,7 +306,14 @@
             generateQuestion();
             placeFoods();
           } else {
-            resetSnake(playerId);
+            if (playerId === 1) {
+            score1 = Math.max(0, score1 - 2);
+            document.getElementById("scoreBlue").innerText = `蓝方得分：${score1}`;
+          } else {
+            score2 = Math.max(0, score2 - 2);
+            document.getElementById("scoreRed").innerText = `红方得分：${score2}`;
+          }
+          resetSnake(playerId);
           }
           break;
         }
@@ -315,9 +325,15 @@
 
     function playerEatHandler(player) {
       return () => {
-        if (player === 1) score1++;
-        else if (player === 2) score2++;
+        if (player === 1) {
+          score1 += 5;
+          document.getElementById("scoreBlue").innerText = `蓝方得分：${score1}`;
+        } else if (player === 2) {
+          score2 += 5;
+          document.getElementById("scoreRed").innerText = `红方得分：${score2}`;
+        }
       };
+    }
     }
 
     function selectMode(button, mode) {
