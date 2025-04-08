@@ -15,13 +15,11 @@
     }
     canvas {
       display: block;
-      margin: 40px auto 60px auto;
+      margin: 40px auto 80px auto;
       background: #e5ffe5;
       border: 3px solid #000000;
-      aspect-ratio: 16 / 9;
-      width: 90vw;
-      height: auto;
-      max-height: calc(100vh - 220px);
+      width: 900px;
+      height: 450px;
       padding-bottom: 10px;
     }
     .mode-buttons {
@@ -55,7 +53,6 @@
       text-align: center;
     }
   </style>
-
 </head>
 <body>
   <h1>Round It Up! 近似值大挑战</h1>
@@ -64,14 +61,12 @@
     <button id="btn-hundred" onclick="selectMode(this, 'hundred')">百位近似值</button>
   </div>
   <p id="question" style="min-height: 40px; font-size: 28px; margin: 10px 0; color: #333;"></p>
-  <canvas id="gameCanvas" width="960" height="540"></canvas>
+  <canvas id="gameCanvas" width="900" height="450"></canvas>
   <div style="position: absolute; top: 10px; left: 20px; font-size: 20px; color: #555; z-index: 20;">
-  <p id="timerDisplay">倒数计时：5分00秒</p>
-</div>
-
-  
+    <p id="timerDisplay">倒数计时：5分00秒</p>
+  </div>
+  <p id="scoreDisplay" style="display:none;"></p>
   <div id="countdown"></div>
-
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -80,10 +75,10 @@
     let foods, currentNumber, correctAnswer, options;
     let currentMode = 'ten';
     let game;
-let timer;
-let timeLeft = 300; // 7 minutes
-let flashToggle = true;
-setInterval(() => { flashToggle = !flashToggle; }, 300);
+    let timer;
+    let timeLeft = 300;
+    let flashToggle = true;
+    setInterval(() => { flashToggle = !flashToggle; }, 300);
 
     function prepareGame(mode) {
       currentMode = mode;
@@ -91,7 +86,8 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
       clearInterval(game);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       document.getElementById("timerDisplay").innerText = "倒数计时：5分00秒";
-                  requestFullscreen();
+      document.getElementById("scoreDisplay").innerText = "";
+      requestFullscreen();
       let countdown = 3;
       const countdownEl = document.getElementById("countdown");
       countdownEl.innerText = countdown;
@@ -108,15 +104,15 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
     }
 
     function requestFullscreen() {
-  const docElm = document.documentElement;
-  if (docElm.requestFullscreen) {
-    docElm.requestFullscreen();
-  } else if (docElm.webkitRequestFullscreen) {
-    docElm.webkitRequestFullscreen();
-  } else if (docElm.msRequestFullscreen) {
-    docElm.msRequestFullscreen();
-  }
-}
+      const docElm = document.documentElement;
+      if (docElm.requestFullscreen) {
+        docElm.requestFullscreen();
+      } else if (docElm.webkitRequestFullscreen) {
+        docElm.webkitRequestFullscreen();
+      } else if (docElm.msRequestFullscreen) {
+        docElm.msRequestFullscreen();
+      }
+    }
 
     function generateQuestion() {
       do {
@@ -143,7 +139,7 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
         document.getElementById("timerDisplay").innerText = `倒数计时：${minutes}分${seconds.toString().padStart(2, '0')}秒`;
-                if (timeLeft <= 0) {
+        if (timeLeft <= 0) {
           clearInterval(timer);
           clearInterval(game);
           let winner = score1 > score2 ? '蓝方胜出！' : score2 > score1 ? '红方胜出！' : '平局！';
@@ -182,7 +178,7 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
       generateQuestion();
       placeFoods();
       if (typeof game !== 'undefined') clearInterval(game);
-      game = setInterval(draw, 180); // 修复变量重复声明问题 // 增加移动速度
+      game = setInterval(draw, 180);
     }
 
     function resetSnake(player) {
@@ -198,6 +194,8 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
     function placeFoods() {
       const avoidZones = [...snake1, ...snake2];
       const minDistance = box * 6;
+      const minFoodDistance = box * 2;
+      let placedFoods = [];
       foods = options.map(value => {
         let pos;
         let attempts = 0;
@@ -212,6 +210,12 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
           avoidZones.some(s => Math.abs(s.x - pos.x) < minDistance && Math.abs(s.y - pos.y) < minDistance)
           && attempts < 100
         );
+        while (
+          (avoidZones.some(s => Math.abs(s.x - pos.x) < minDistance && Math.abs(s.y - pos.y) < minDistance) ||
+           placedFoods.some(f => Math.abs(f.x - pos.x) < minFoodDistance && Math.abs(f.y - pos.y) < minFoodDistance))
+          && attempts < 100
+        );
+        placedFoods.push(pos);
         return pos;
       });
     }
@@ -239,7 +243,7 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
         ctx.fillStyle = flashToggle ? "#ffff33" : "#ffee00";
         ctx.fillRect(food.x, food.y, box, box);
         ctx.fillStyle = "#000";
-        ctx.font = "16px Arial";
+        ctx.font = "bold 20px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(food.value, food.x + box / 2, food.y + box / 2);
@@ -247,8 +251,6 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
 
       moveSnake(snake1, dir1, playerEatHandler(1), 1);
       moveSnake(snake2, dir2, playerEatHandler(2), 2);
-
-      document.getElementById("scoreDisplay").innerText = `蓝方得分：${score1} ｜ 红方得分：${score2}`;
     }
 
     function drawGrid() {
@@ -275,7 +277,7 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
       }
     }
 
-function moveSnake(snake, direction, eatCallback, playerId) {
+    function moveSnake(snake, direction, eatCallback, playerId) {
       let headX = snake[0].x;
       let headY = snake[0].y;
 
@@ -297,12 +299,10 @@ function moveSnake(snake, direction, eatCallback, playerId) {
         if (food.x === headX && food.y === headY) {
           eaten = true;
           if (food.value === correctAnswer) {
-            
             eatCallback();
             generateQuestion();
             placeFoods();
           } else {
-            
             resetSnake(playerId);
           }
           break;
@@ -319,7 +319,8 @@ function moveSnake(snake, direction, eatCallback, playerId) {
         else if (player === 2) score2++;
       };
     }
-  function selectMode(button, mode) {
+
+    function selectMode(button, mode) {
       document.getElementById('btn-ten').style.outline = 'none';
       document.getElementById('btn-hundred').style.outline = 'none';
       document.getElementById('btn-ten').style.boxShadow = 'none';
@@ -328,6 +329,6 @@ function moveSnake(snake, direction, eatCallback, playerId) {
       button.style.boxShadow = '0 0 10px 3px #66bb6a';
       prepareGame(mode);
     }
-</script>
+  </script>
 </body>
 </html>
