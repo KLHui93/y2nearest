@@ -82,7 +82,7 @@ setInterval(() => { flashToggle = !flashToggle; }, 300);
       
       
       currentMode = mode;
-      requestFullscreen(canvas);
+      requestFullscreen(document.documentElement);
       let countdown = 3;
       const countdownEl = document.getElementById("countdown");
       countdownEl.innerText = countdown;
