@@ -218,6 +218,8 @@
       foods = options.map(value => {
         let pos;
         let attempts = 0;
+        let pos;
+        let attempts = 0;
         do {
           pos = {
             x: Math.floor(Math.random() * (canvas.width / box)) * box,
@@ -234,6 +236,9 @@
            placedFoods.some(f => Math.abs(f.x - pos.x) < minFoodDistance && Math.abs(f.y - pos.y) < minFoodDistance))
           && attempts < 100
         );
+        if (attempts >= 100) {
+          console.warn("⚠️ 超过最大放置尝试次数，强行使用当前位置:", pos);
+        }
         placedFoods.push(pos);
         return pos;
       });
@@ -253,6 +258,7 @@
     });
 
     function draw() {
+      try {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawGrid();
       drawSnake(snake1, "#0066ff", "#3399ff");
@@ -266,10 +272,17 @@
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(food.value, food.x + box / 2, food.y + box / 2);
+        if (food.x < 0 || food.x >= canvas.width || food.y < 0 || food.y >= canvas.height) {
+          console.warn("⚠️ 食物超出范围:", food);
+        }
       });
 
       moveSnake(snake1, dir1, playerEatHandler(1), 1);
       moveSnake(snake2, dir2, playerEatHandler(2), 2);
+      } catch (error) {
+        console.error("🐛 游戏渲染出错：", error);
+        clearInterval(game);
+        alert("游戏中发生错误，已停止运行。请检查控制台。");
     }
 
     function drawGrid() {
